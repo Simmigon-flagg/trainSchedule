@@ -6,14 +6,14 @@ $("#add-train-btn").on("click", function (event) {
 
   var trainName = $("#train-name-input").val().trim();
   var destination = $("#destination-input").val().trim();
-  var firstTrain = moment($("#firstTime-input").val().trim(), "DD/MM/YY").format("X");
-  var freq = $("#freq-input").val().trim();
+  var firstTime = $("#firstTime-input").val().trim();
+  var freqs = $("#freq-input").val().trim();
 
   var trains = {
     train: trainName,
     destination: destination,
-    firstTime: firstTrain,
-    freq: freq
+    first: firstTime,
+    freq: freqs
   };
 
   database.ref().push(trains);
@@ -28,9 +28,11 @@ $("#add-train-btn").on("click", function (event) {
 database.ref().on("child_added", function (childSnapshot, prevChildKey) {
   var trainName = childSnapshot.val().train;
   var destination = childSnapshot.val().destination;
-  var firstTrain = childSnapshot.val().firstTime;
-  var freq = childSnapshot.val().freq;
-    var firstTimeConverted = moment(firstTrain, "HH:mm").subtract(1, "years");
+  var first_Time = childSnapshot.val().first;
+  var trainfreq = childSnapshot.val().freq;
+
+    var firstTimeConverted = moment(first_Time, "HH:mm").subtract(1, "years");
+
     // Current Time
     var currentTime = moment();
 
@@ -38,16 +40,17 @@ database.ref().on("child_added", function (childSnapshot, prevChildKey) {
     var diffTime = moment().diff(moment(firstTimeConverted), "minutes");
 
     // Time apart (remainder)
-    var tRemainder = diffTime % freq;
+    var tRemainder = diffTime % trainfreq;
 
     // Minute Until Train
-    var tMinutesTillTrain = freq - tRemainder;
-
+    var tMinutesTillTrain = trainfreq - tRemainder;
+  
     // Next Train
     var nextTrain = moment().add(tMinutesTillTrain, "minutes");
-    var next_train =  moment(nextTrain).format("hh:mm a");
+    nextTrain = moment(nextTrain).format("hh:mm a");
+  // console.log(next_train);
 
   // Add each train's data into the table
   $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + destination + "</td><td>" +
-    freq + "</td><td>" + next_train  + "</td><td>" + tMinutesTillTrain  + "</td><td>");
+    trainfreq + "</td><td>" + nextTrain + "</td><td>" + tMinutesTillTrain  + "</td><td>");
 });
